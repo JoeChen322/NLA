@@ -12,49 +12,25 @@ using namespace Eigen;
 typedef Eigen::Triplet<double> T;
 
 
-/*
-//convolution function
-SparseMatrix<double, RowMajor> convolution(int kernel_size,int height,int width,const Matrix3f &kernel)
-{
-  
-  SparseMatrix<double, RowMajor> A(height*width,height*width);
-  std::vector<T> hav2TripletList;
-  hav2TripletList.reserve(height * width * kernel_size * kernel_size);
-  for (int i=0;i<height;++i )
-  {  
-    std::cout<<1<<std::endl;
-    for (int j=0;j<width;++j )
-    {
-      
-      //int k=i*width+j;
-      
-      for (int m=0;m<kernel_size;++m )
-        {
-          std::cout<<1<<std::endl;
-          hav2TripletList.push_back(Triplet<double>(k,k+m,kernel(0,m)));
-          hav2TripletList.push_back(Triplet<double>(k,k+width-1,kernel(1,m)));         
-          hav2TripletList.push_back(Triplet<double>(k,k+2*width-1,kernel(2,m)));
-        }
-    }
-    
-  A.setFromTriplets(hav2TripletList.begin(), hav2TripletList.end());  
-  Eigen::saveMarket(A, "A1.mtx");
- 
-  }
-   return A;
-}*/
-
 SparseMatrix<double, RowMajor> convolution( MatrixXd kernel, int height, int width,int kernel_size)
 {
-    
-    
+       
     SparseMatrix<double, RowMajor> A(height*width, height*width);
     std::vector<T> hav2TripletList;
     hav2TripletList.reserve(height*width * kernel_size * kernel_size);
-    hav2TripletList.push_back(Triplet<double>(0,0,kernel(1,1)));
-    hav2TripletList.push_back(Triplet<double>(0,width-1,kernel(1,1)));  
-    hav2TripletList.push_back(Triplet<double>(width*(height-1),width*(height-1),kernel(1,1)));  
-    hav2TripletList.push_back(Triplet<double>(width*height-1,width*height-1,kernel(1,1)));
+    for (int m=1;m<kernel_size;m++ )
+    {
+      hav2TripletList.push_back(Triplet<double>(0,0,kernel(1,m)));
+      hav2TripletList.push_back(Triplet<double>(0,width+m,kernel(2,m)));
+      hav2TripletList.push_back(Triplet<double>(width-1,width-1-m,kernel(1,m-1)));  
+      hav2TripletList.push_back(Triplet<double>(width-1,2*width-1-m,kernel(2,m-1)));  
+      hav2TripletList.push_back(Triplet<double>(width*(height-1),width*(height-1)+m,kernel(0,m))); 
+      hav2TripletList.push_back(Triplet<double>(width*(height-1),width*(height-1)+m,kernel(1,m)));  
+      hav2TripletList.push_back(Triplet<double>(width*height-1,width*height-1-m,kernel(0,m-1)));          
+      hav2TripletList.push_back(Triplet<double>(width*height-1,width*height-1-m,kernel(1,m-1)));        
+     
+    }
+   
     for (int j = 1; j < width-1; j++)
     {
       for (int m=0;m<kernel_size;m++ )
@@ -138,9 +114,9 @@ int main(int argc, char* argv[])
  
  
  MatrixXd hsh2(3,3);
-  hsh2 << 0.0, -3.0, 0.0,
-        -1.0, 9.0, -3.0,
-        0.0, -1.0, 0.0;
+  hsh2 << 1.0/3.0, 1.0/3.0, 1.0/3.0,
+        1.0/3.0, 1.0/3.0, 1.0/3.0,
+        1.0/3.0, 1.0/3.0, 1.0/3.0;
 
 
   // Prepare Eigen matrices for each RGB channel 
